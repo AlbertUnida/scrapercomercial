@@ -594,7 +594,7 @@ else:
 st.divider()
 st.markdown(
     "<p style='text-align:center; color:#9CA3AF; font-size:0.75rem; margin-top:1rem;'>"
-    "Buscador de Locales por Rubro con Google Maps &nbsp;·&nbsp; Uso responsable y ético de datos públicos."
+    "Buscador de Locales por Rubro con Google Maps &nbsp;·&nbsp; Uso responsable y ético de datos públicos - Creado por Alberto Aguilera"
     "</p>",
     unsafe_allow_html=True,
 )
