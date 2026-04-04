@@ -252,12 +252,25 @@ async def scrape_google_maps(
             except Exception:
                 continue
 
-        # Wait for feed
+        # Wait for feed — try multiple selectors in case Google updates the DOM
         emit("Esperando resultados...", 0.10)
-        try:
-            await page.wait_for_selector('div[role="feed"]', timeout=20000)
-        except Exception:
-            emit("No se encontraron resultados.", 1.0)
+        feed_found = False
+        for feed_sel in ['div[role="feed"]', '[aria-label*="Resultados"]', '[aria-label*="Results"]']:
+            try:
+                await page.wait_for_selector(feed_sel, timeout=30000)
+                feed_found = True
+                break
+            except Exception:
+                continue
+        if not feed_found:
+            # Last resort: check if any articles exist without a feed wrapper
+            try:
+                await page.wait_for_selector('div[role="article"]', timeout=10000)
+                feed_found = True
+            except Exception:
+                pass
+        if not feed_found:
+            emit("No se encontraron resultados (feed no detectado).", 1.0)
             await browser.close()
             return []
 

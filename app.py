@@ -27,123 +27,223 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ── Custom CSS: purple theme + Poppins Semibold ───────────────────────────────
+# ── Custom CSS: light SaaS theme + Inter ─────────────────────────────────────
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 html, body, [class*="css"], .stApp {
-    font-family: 'Poppins', sans-serif !important;
-    background-color: #0F0A1E !important;
-    color: #FFFFFF !important;
+    font-family: 'Inter', sans-serif !important;
+    background-color: #F4F4F8 !important;
+    color: #1A1A2E !important;
+}
+
+/* Hide default Streamlit top padding */
+.block-container {
+    padding-top: 0 !important;
+    padding-bottom: 2rem !important;
+    max-width: 1100px !important;
 }
 
 /* Sidebar */
 section[data-testid="stSidebar"] {
-    background-color: #1E1433 !important;
+    background-color: #FFFFFF !important;
 }
 
-/* Main header */
+/* Headers */
 h1, h2, h3, h4 {
-    font-family: 'Poppins', sans-serif !important;
-    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    color: #1A1A2E !important;
+}
+
+/* Purple hero header banner */
+.hero-banner {
+    background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+    border-radius: 16px;
+    padding: 2rem 2.5rem 2.2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+}
+.hero-icon {
+    background: rgba(255,255,255,0.18);
+    border-radius: 14px;
+    padding: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    min-width: 58px;
+    min-height: 58px;
+}
+.hero-title {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
     color: #FFFFFF !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+.hero-subtitle {
+    font-size: 0.92rem !important;
+    color: rgba(255,255,255,0.80) !important;
+    margin: 0.15rem 0 0 0 !important;
+}
+
+/* Search card */
+.search-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 1.6rem 2rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    margin-bottom: 1.5rem;
 }
 
 /* Primary buttons */
 .stButton > button {
-    background-color: #7C3AED !important;
+    background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%) !important;
     color: #FFFFFF !important;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     font-weight: 600 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     border: none !important;
-    padding: 0.55rem 1.4rem !important;
-    transition: background-color 0.2s ease !important;
+    padding: 0.65rem 1.6rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.30) !important;
     width: 100%;
 }
 .stButton > button:hover:not(:disabled) {
-    background-color: #5B21B6 !important;
+    background: linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%) !important;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.40) !important;
+    transform: translateY(-1px) !important;
 }
 .stButton > button:disabled {
-    background-color: #4B5563 !important;
+    background: #E5E7EB !important;
     color: #9CA3AF !important;
+    box-shadow: none !important;
     cursor: not-allowed !important;
 }
 
 /* Download button */
 .stDownloadButton > button {
-    background-color: #059669 !important;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     color: #FFFFFF !important;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     font-weight: 600 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     border: none !important;
-    padding: 0.55rem 1.4rem !important;
+    padding: 0.65rem 1.6rem !important;
+    box-shadow: 0 2px 8px rgba(5,150,105,0.30) !important;
 }
 .stDownloadButton > button:hover {
-    background-color: #047857 !important;
+    background: linear-gradient(135deg, #047857 0%, #065F46 100%) !important;
+    box-shadow: 0 4px 14px rgba(5,150,105,0.40) !important;
 }
 
 /* Selectboxes */
 .stSelectbox label {
-    color: #A78BFA !important;
+    color: #6B7280 !important;
     font-weight: 600 !important;
-    font-size: 0.85rem !important;
-    letter-spacing: 0.03em !important;
+    font-size: 0.80rem !important;
+    letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
 }
 .stSelectbox > div > div {
-    background-color: #1E1433 !important;
-    border: 1px solid #7C3AED !important;
-    color: #FFFFFF !important;
-    border-radius: 8px !important;
+    background-color: #FFFFFF !important;
+    border: 1.5px solid #E5E7EB !important;
+    color: #1A1A2E !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+.stSelectbox > div > div:focus-within {
+    border-color: #7C3AED !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.12) !important;
+}
+
+/* Text input */
+.stTextInput > div > div > input {
+    background-color: #FFFFFF !important;
+    border: 1.5px solid #E5E7EB !important;
+    color: #1A1A2E !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+.stTextInput > div > div > input:focus {
+    border-color: #7C3AED !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.12) !important;
 }
 
 /* Progress bar */
 .stProgress > div > div > div > div {
-    background-color: #7C3AED !important;
+    background: linear-gradient(90deg, #7C3AED, #A78BFA) !important;
+    border-radius: 99px !important;
 }
 
 /* Metrics */
 [data-testid="stMetric"] {
-    background-color: #1E1433;
-    border: 1px solid #7C3AED;
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
+    background-color: #FFFFFF;
+    border: 1.5px solid #F3F4F6;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
 }
 [data-testid="stMetricLabel"] {
-    color: #A78BFA !important;
+    color: #6B7280 !important;
     font-weight: 600 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
 }
 [data-testid="stMetricValue"] {
-    color: #FFFFFF !important;
+    color: #1A1A2E !important;
     font-weight: 700 !important;
+    font-size: 1.6rem !important;
 }
 
 /* Dataframe container */
 .stDataFrame {
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
-    border: 1px solid #7C3AED;
+    border: 1.5px solid #F3F4F6;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    background: #FFFFFF;
 }
 
 /* Info / error / warning boxes */
 .stAlert {
-    border-radius: 8px !important;
+    border-radius: 10px !important;
+    border-left-width: 4px !important;
 }
 
 /* Divider */
 hr {
-    border-color: #7C3AED44 !important;
+    border-color: #E5E7EB !important;
+    margin: 1.5rem 0 !important;
 }
 
 /* Status widget */
 [data-testid="stStatusWidget"] {
-    background-color: #1E1433 !important;
-    border: 1px solid #7C3AED !important;
-    border-radius: 8px !important;
+    background-color: #FFFFFF !important;
+    border: 1.5px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+}
+
+/* Section label above controls */
+.section-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 </style>
 """,
@@ -221,34 +321,57 @@ for _dept, _cities in PARAGUAY_LOCATIONS.items():
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown(
-    "<h1 style='text-align:center; color:#A78BFA; margin-bottom:0.2rem;'>"
-    "Paraguay Lead Scraper</h1>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    "<p style='text-align:center; color:#D1D5DB; margin-top:0; margin-bottom:1.5rem;'>"
-    "Extrae leads comerciales de Google Maps en Paraguay</p>",
+    """
+    <div class="hero-banner">
+        <div class="hero-icon">🔍</div>
+        <div>
+            <p class="hero-title">LeadScrapper Paraguay</p>
+            <p class="hero-subtitle">Extracción inteligente de leads comerciales</p>
+        </div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
-st.divider()
+# ── Search card ───────────────────────────────────────────────────────────────
+st.markdown('<div class="search-card">', unsafe_allow_html=True)
 
-# ── Search controls ───────────────────────────────────────────────────────────
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns([2, 2, 1])
 
 with col1:
+    st.markdown(
+        '<p class="section-label">&#9906; &nbsp;Tipo de Negocio</p>',
+        unsafe_allow_html=True,
+    )
     selected_business_type = st.selectbox(
         "Tipo de Negocio",
         options=BUSINESS_TYPES,
         index=0,
+        label_visibility="collapsed",
     )
 
 with col2:
+    st.markdown(
+        '<p class="section-label">&#128205; &nbsp;Ubicación (Paraguay)</p>',
+        unsafe_allow_html=True,
+    )
     selected_location = st.selectbox(
         "Ciudad / Distrito",
         options=location_options,
         index=0,
+        label_visibility="collapsed",
     )
+
+with col3:
+    st.markdown("<br>", unsafe_allow_html=True)
+    extract_btn = st.button(
+        "🔍 &nbsp;Extraer Leads",
+        disabled=st.session_state.is_scraping,
+        use_container_width=True,
+        key="extract_btn",
+    )
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 # Detect parameter change → reset state
 if (
@@ -264,16 +387,8 @@ if (
 btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 2])
 
 with btn_col1:
-    extract_btn = st.button(
-        "Extraer Leads",
-        disabled=st.session_state.is_scraping,
-        use_container_width=True,
-        key="extract_btn",
-    )
-
-with btn_col2:
     more_btn = st.button(
-        "Extraer más",
+        "➕ &nbsp;Extraer más",
         disabled=(
             st.session_state.is_scraping
             or st.session_state.leads_df is None
@@ -455,18 +570,21 @@ else:
     st.markdown(
         """
         <div style="
-            border: 1px dashed #7C3AED44;
-            border-radius: 10px;
-            padding: 3rem;
+            background: #FFFFFF;
+            border: 2px dashed #E5E7EB;
+            border-radius: 16px;
+            padding: 3.5rem 2rem;
             text-align: center;
-            color: #9CA3AF;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         ">
-            <p style="font-size:1.1rem; font-weight:600; color:#A78BFA;">
-                Selecciona un tipo de negocio y una ciudad, luego presiona
-                <span style="color:#7C3AED;">Extraer Leads</span>
+            <div style="font-size:2.5rem; margin-bottom:0.8rem;">📋</div>
+            <p style="font-size:1.05rem; font-weight:600; color:#1A1A2E; margin-bottom:0.5rem;">
+                Ningún lead extraído aún
             </p>
-            <p style="font-size:0.85rem;">
-                Los resultados aparecer&#225;n aquí en forma de tabla descargable.
+            <p style="font-size:0.88rem; color:#9CA3AF; margin:0;">
+                Selecciona un tipo de negocio y una ciudad, luego presiona
+                <span style="color:#7C3AED; font-weight:600;">Extraer Leads</span>
+                para comenzar.
             </p>
         </div>
         """,
@@ -476,8 +594,8 @@ else:
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.divider()
 st.markdown(
-    "<p style='text-align:center; color:#6B7280; font-size:0.75rem;'>"
-    "Paraguay Lead Scraper — Uso responsable y ético de datos públicos."
+    "<p style='text-align:center; color:#9CA3AF; font-size:0.75rem; margin-top:1rem;'>"
+    "LeadScrapper Paraguay &nbsp;·&nbsp; Uso responsable y ético de datos públicos."
     "</p>",
     unsafe_allow_html=True,
 )
