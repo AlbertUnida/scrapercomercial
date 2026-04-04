@@ -325,8 +325,8 @@ st.markdown(
     <div class="hero-banner">
         <div class="hero-icon">🔍</div>
         <div>
-            <p class="hero-title">LeadScrapper Paraguay</p>
-            <p class="hero-subtitle">Extracción inteligente de leads comerciales</p>
+            <p class="hero-title">Buscador de Locales por Rubro con Google Maps</p>
+            <p class="hero-subtitle">Extracción locales por rubro dentro de Paraguay</p>
         </div>
     </div>
     """,
@@ -336,7 +336,7 @@ st.markdown(
 # ── Search card ───────────────────────────────────────────────────────────────
 st.markdown('<div class="search-card">', unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([2, 2, 1])
+col1, col2 = st.columns([1, 1])
 
 with col1:
     st.markdown(
@@ -362,15 +362,6 @@ with col2:
         label_visibility="collapsed",
     )
 
-with col3:
-    st.markdown("<br>", unsafe_allow_html=True)
-    extract_btn = st.button(
-        "🔍 &nbsp;Extraer Leads",
-        disabled=st.session_state.is_scraping,
-        use_container_width=True,
-        key="extract_btn",
-    )
-
 st.markdown("</div>", unsafe_allow_html=True)
 
 # Detect parameter change → reset state
@@ -387,6 +378,14 @@ if (
 btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 2])
 
 with btn_col1:
+    extract_btn = st.button(
+        "🔍 &nbsp;Buscar Locales",
+        disabled=st.session_state.is_scraping,
+        use_container_width=True,
+        key="extract_btn",
+    )
+
+with btn_col2:
     more_btn = st.button(
         "➕ &nbsp;Extraer más",
         disabled=(
@@ -579,11 +578,11 @@ else:
         ">
             <div style="font-size:2.5rem; margin-bottom:0.8rem;">📋</div>
             <p style="font-size:1.05rem; font-weight:600; color:#1A1A2E; margin-bottom:0.5rem;">
-                Ningún lead extraído aún
+                Ningún local extraído aún
             </p>
             <p style="font-size:0.88rem; color:#9CA3AF; margin:0;">
                 Selecciona un tipo de negocio y una ciudad, luego presiona
-                <span style="color:#7C3AED; font-weight:600;">Extraer Leads</span>
+                <span style="color:#7C3AED; font-weight:600;">Buscar Locales</span>
                 para comenzar.
             </p>
         </div>
@@ -595,7 +594,7 @@ else:
 st.divider()
 st.markdown(
     "<p style='text-align:center; color:#9CA3AF; font-size:0.75rem; margin-top:1rem;'>"
-    "LeadScrapper Paraguay &nbsp;·&nbsp; Uso responsable y ético de datos públicos."
+    "Buscador de Locales por Rubro con Google Maps &nbsp;·&nbsp; Uso responsable y ético de datos públicos."
     "</p>",
     unsafe_allow_html=True,
 )
