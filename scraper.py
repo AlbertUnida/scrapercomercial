@@ -257,6 +257,25 @@ async def scrape_google_maps(
                 except Exception:
                     pass
 
+            # Pre-set Google consent cookies so datacenter IPs never hit consent.google.com
+            try:
+                await context.add_cookies([
+                    {
+                        "name": "SOCS",
+                        "value": "CAESEwgDEgk2MDc5ODk5NzkaAmVzIAEaBgiAo_CmBg",
+                        "domain": ".google.com",
+                        "path": "/",
+                    },
+                    {
+                        "name": "CONSENT",
+                        "value": "YES+srp.gws-20210720-0-RC1.es+FX+667",
+                        "domain": ".google.com",
+                        "path": "/",
+                    },
+                ])
+            except Exception:
+                pass
+
             emit("Navegando a Google Maps...", 0.05)
 
             try:
@@ -266,40 +285,39 @@ async def scrape_google_maps(
                 return []
 
             current_url = page.url
-            page_title = ""
             try:
                 page_title = await page.title()
-                emit(f"Página: {page_title[:60]} | {current_url[:80]}", 0.06)
+                emit(f"Página cargada: {page_title[:60]}", 0.06)
+                emit(f"URL: {current_url[:100]}", 0.07)
             except Exception:
                 pass
 
-            # Handle Google consent redirect (consent.google.com or accounts.google.com)
-            if "consent.google.com" in current_url or "accounts.google.com" in current_url:
-                emit("Detectado redirect de consentimiento de Google, aceptando...", 0.07)
+            # Fallback: if still on consent page, try clicking accept
+            if "consent.google.com" in page.url or "accounts.google.com" in page.url:
+                emit("Manejando página de consent...", 0.08)
                 for sel in [
                     "#L2AGLb",
                     'button[jsname="higCR"]',
                     'button[aria-label*="Accept all"]',
                     'button[aria-label*="Aceptar todo"]',
-                    'button[aria-label*="Accept"]',
-                    'button[aria-label*="Aceptar"]',
                     'form[action*="save"] button',
                     'form[action*="consent"] button',
                     '.lssxud button',
+                    'button',
                 ]:
                     try:
                         btn = await page.query_selector(sel)
                         if btn and await btn.is_visible():
                             await btn.click()
                             await page.wait_for_load_state("domcontentloaded", timeout=15000)
-                            emit(f"Consent aceptado. Nueva URL: {page.url[:80]}", 0.08)
+                            emit(f"Consent aceptado. Nueva URL: {page.url[:80]}", 0.09)
                             break
                     except Exception:
                         continue
 
             await random_delay()
 
-            # Dismiss cookie consent inside Google Maps (in-page dialog)
+            # Dismiss any in-page cookie dialog inside Maps
             for sel in [
                 "#L2AGLb",
                 'button[aria-label*="Accept all"]',
