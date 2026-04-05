@@ -265,6 +265,12 @@ async def scrape_google_maps(
                 emit(f"Error al cargar Google Maps: {e}", 1.0)
                 return []
 
+            try:
+                emit(f"URL: {page.url[:100]}", 0.06)
+                emit(f"Título: {(await page.title())[:80]}", 0.07)
+            except Exception:
+                pass
+
             await random_delay()
 
             # Dismiss cookie consent / accept dialog
@@ -302,7 +308,12 @@ async def scrape_google_maps(
                 except Exception:
                     pass
             if not feed_found:
-                emit("No se encontraron resultados (feed no detectado).", 1.0)
+                try:
+                    titulo = await page.title()
+                    url_actual = page.url
+                    emit(f"Feed NO encontrado. Título: '{titulo}' | URL: {url_actual[:100]}", 1.0)
+                except Exception:
+                    emit("Feed NO encontrado (sin info adicional).", 1.0)
                 return []
 
             # ── Scroll to load enough cards ──────────────────────────────────────

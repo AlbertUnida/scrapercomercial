@@ -256,7 +256,7 @@ hr {
 def ensure_playwright_browsers():
     try:
         subprocess.run(
-            [sys.executable, "-m", "playwright", "install", "--with-deps", "chromium"],
+            [sys.executable, "-m", "playwright", "install", "chromium"],
             check=False,
             capture_output=True,
             timeout=120,
@@ -425,8 +425,12 @@ if extract_btn:
                     selected_business_type,
                     selected_location,
                     batch_offset=0,
+                    progress_callback=_progress_cb,
                 )
             )
+
+            for _msg, _pct in st.session_state.status_log:
+                st.write(f"› {_msg}")
 
             if not raw:
                 st.session_state.error_message = (
@@ -463,8 +467,12 @@ if more_btn and st.session_state.leads_df is not None:
                     selected_business_type,
                     selected_location,
                     batch_offset=st.session_state.batch_offset,
+                    progress_callback=_progress_cb,
                 )
             )
+
+            for _msg, _ in st.session_state.status_log:
+                st.write(f"› {_msg}")
 
             if not raw:
                 st.session_state.search_exhausted = True
