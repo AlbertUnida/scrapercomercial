@@ -265,20 +265,48 @@ async def scrape_google_maps(
                 emit(f"Error al cargar Google Maps: {e}", 1.0)
                 return []
 
+            current_url = page.url
+            page_title = ""
             try:
-                emit(f"URL: {page.url[:100]}", 0.06)
-                emit(f"Título: {(await page.title())[:80]}", 0.07)
+                page_title = await page.title()
+                emit(f"Página: {page_title[:60]} | {current_url[:80]}", 0.06)
             except Exception:
                 pass
 
+            # Handle Google consent redirect (consent.google.com or accounts.google.com)
+            if "consent.google.com" in current_url or "accounts.google.com" in current_url:
+                emit("Detectado redirect de consentimiento de Google, aceptando...", 0.07)
+                for sel in [
+                    "#L2AGLb",
+                    'button[jsname="higCR"]',
+                    'button[aria-label*="Accept all"]',
+                    'button[aria-label*="Aceptar todo"]',
+                    'button[aria-label*="Accept"]',
+                    'button[aria-label*="Aceptar"]',
+                    'form[action*="save"] button',
+                    'form[action*="consent"] button',
+                    '.lssxud button',
+                ]:
+                    try:
+                        btn = await page.query_selector(sel)
+                        if btn and await btn.is_visible():
+                            await btn.click()
+                            await page.wait_for_load_state("domcontentloaded", timeout=15000)
+                            emit(f"Consent aceptado. Nueva URL: {page.url[:80]}", 0.08)
+                            break
+                    except Exception:
+                        continue
+
             await random_delay()
 
-            # Dismiss cookie consent / accept dialog
+            # Dismiss cookie consent inside Google Maps (in-page dialog)
             for sel in [
+                "#L2AGLb",
+                'button[aria-label*="Accept all"]',
+                'button[aria-label*="Aceptar todo"]',
                 'button[aria-label*="Accept"]',
                 'button[aria-label*="Aceptar"]',
                 'button[aria-label*="Agree"]',
-                "#L2AGLb",
                 'form:has(button) button:first-of-type',
             ]:
                 try:
