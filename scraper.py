@@ -234,19 +234,23 @@ async def scrape_google_maps(
     emit("Iniciando navegador...", 0.02)
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--single-process",
-                "--no-zygote",
-                "--disable-blink-features=AutomationControlled",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--lang=es-PY",
-            ],
-        )
+        try:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-extensions",
+                    "--disable-default-apps",
+                    "--lang=es-PY",
+                ],
+            )
+        except Exception as e:
+            emit(f"Error al iniciar el navegador: {e}", 1.0)
+            return []
 
         try:
             context = await browser.new_context(
