@@ -49,99 +49,89 @@ async def extract_card_data(card: ElementHandle) -> dict:
         "URL de la ubicación en Google Maps": "N/A",
     }
 
-    try:
-        # Business name — try heading classes first, fall back to any h3/h2
-        for sel in [
-            ".fontHeadlineSmall",
-            "[class*='fontHeadlineSmall']",
-            "h3",
-            "h2",
-        ]:
-            try:
-                el = await card.query_selector(sel)
-                if el:
-                    text = (await el.inner_text()).strip()
-                    if text:
-                        record["Nombre de Negocio"] = text
-                        break
-            except Exception:
-                continue
+    # Business name — try heading classes first, fall back to any h3/h2
+    for sel in [
+        ".fontHeadlineSmall",
+        "[class*='fontHeadlineSmall']",
+        "h3",
+        "h2",
+    ]:
+        try:
+            el = await card.query_selector(sel)
+            if el:
+                text = (await el.inner_text()).strip()
+                if text:
+                    record["Nombre de Negocio"] = text
+                    break
+        except Exception:
+            continue
 
-        # Rating from aria-label  (e.g. "4.5 stars" / "4,5 estrellas")
-        for sel in [
-            'span[aria-label*="stars"]',
-            'span[aria-label*="estrellas"]',
-            'span[aria-label*="estrella"]',
-        ]:
-            try:
-                el = await card.query_selector(sel)
-                if el:
-                    label = await el.get_attribute("aria-label") or ""
-                    m = re.search(r"([\d][.,]?[\d]?)", label)
-                    if m:
-                        record["Calificación (Estrellas)"] = m.group(1).replace(",", ".")
-                        break
-            except Exception:
-                continue
+    # Rating from aria-label  (e.g. "4.5 stars" / "4,5 estrellas")
+    for sel in [
+        'span[aria-label*="stars"]',
+        'span[aria-label*="estrellas"]',
+        'span[aria-label*="estrella"]',
+    ]:
+        try:
+            el = await card.query_selector(sel)
+            if el:
+                label = await el.get_attribute("aria-label") or ""
+                m = re.search(r"([\d][.,]?[\d]?)", label)
+                if m:
+                    record["Calificación (Estrellas)"] = m.group(1).replace(",", ".")
+                    break
+        except Exception:
+            continue
 
-        # Review count
-        for sel in [
-            'span[aria-label*="reviews"]',
-            'span[aria-label*="reseñas"]',
-            'span[aria-label*="reseña"]',
-        ]:
-            try:
-                el = await card.query_selector(sel)
-                if el:
-                    label = await el.get_attribute("aria-label") or ""
-                    m = re.search(r"([\d.,]+)", label)
-                    if m:
-                        record["Número de Reseñas"] = m.group(1).replace(".", "").replace(",", "")
-                        break
-            except Exception:
-                continue
+    # Review count
+    for sel in [
+        'span[aria-label*="reviews"]',
+        'span[aria-label*="reseñas"]',
+        'span[aria-label*="reseña"]',
+    ]:
+        try:
+            el = await card.query_selector(sel)
+            if el:
+                label = await el.get_attribute("aria-label") or ""
+                m = re.search(r"([\d.,]+)", label)
+                if m:
+                    record["Número de Reseñas"] = m.group(1).replace(".", "").replace(",", "")
+                    break
+        except Exception:
+            continue
 
-        # Direct Google Maps link from card
-        for sel in ["a.hfpxzc", "a[href*='/maps/place/']", "a[data-value]"]:
-            try:
-                el = await card.query_selector(sel)
-                if el:
-                    href = await el.get_attribute("href") or ""
-                    if href:
-                        record["URL de la ubicación en Google Maps"] = href
-                        break
-            except Exception:
-                continue
-
-    except Exception:
-        pass
+    # Direct Google Maps link from card
+    for sel in ["a.hfpxzc", "a[href*='/maps/place/']", "a[data-value]"]:
+        try:
+            el = await card.query_selector(sel)
+            if el:
+                href = await el.get_attribute("href") or ""
+                if href:
+                    record["URL de la ubicación en Google Maps"] = href
+                    break
+        except Exception:
+            continue
 
     return record
 
 
 async def extract_detail_panel(page: Page, record: dict) -> dict:
     try:
-        if page.is_closed():
-            return record
         await page.wait_for_selector("h1", timeout=10000)
     except Exception:
         return record
 
-    try:
-        await random_delay()
-    except Exception:
-        pass
+    await random_delay()
 
     # Phone — 3-tier cascade
     phone = "N/A"
 
+    # Tier 1: data-item-id attribute
     try:
-        # Tier 1: data-item-id attribute
-        if not page.is_closed():
-            el = await page.query_selector('[data-item-id^="phone:tel:"]')
-            if el:
-                raw = await el.get_attribute("data-item-id") or ""
-                phone = raw.replace("phone:tel:", "").strip()
+        el = await page.query_selector('[data-item-id^="phone:tel:"]')
+        if el:
+            raw = await el.get_attribute("data-item-id") or ""
+            phone = raw.replace("phone:tel:", "").strip()
     except Exception:
         pass
 
@@ -153,8 +143,6 @@ async def extract_detail_panel(page: Page, record: dict) -> dict:
             '[aria-label*="Teléfono "]',
         ]:
             try:
-                if page.is_closed():
-                    break
                 el = await page.query_selector(sel)
                 if el:
                     raw = await el.get_attribute("aria-label") or ""
@@ -167,16 +155,15 @@ async def extract_detail_panel(page: Page, record: dict) -> dict:
     # Tier 3: regex scan of all visible spans
     if not phone or phone == "N/A":
         try:
-            if not page.is_closed():
-                spans = await page.query_selector_all("span")
-                for span in spans[:80]:  # cap to avoid huge DOMs
-                    try:
-                        text = (await span.inner_text()).strip()
-                        if re.match(r"^\+?[\d][\d\s\-\(\)]{5,15}$", text):
-                            phone = text
-                            break
-                    except Exception:
-                        continue
+            spans = await page.query_selector_all("span")
+            for span in spans[:80]:  # cap to avoid huge DOMs
+                try:
+                    text = (await span.inner_text()).strip()
+                    if re.match(r"^\+?[\d][\d\s\-\(\)]{5,15}$", text):
+                        phone = text
+                        break
+                except Exception:
+                    continue
         except Exception:
             pass
 
@@ -190,8 +177,6 @@ async def extract_detail_panel(page: Page, record: dict) -> dict:
         'button[data-item-id="address"]',
     ]:
         try:
-            if page.is_closed():
-                break
             el = await page.query_selector(sel)
             if el:
                 raw = (await el.get_attribute("aria-label") or await el.inner_text() or "").strip()
@@ -205,10 +190,9 @@ async def extract_detail_panel(page: Page, record: dict) -> dict:
 
     # Use final page URL as canonical Maps link
     try:
-        if not page.is_closed():
-            current_url = page.url
-            if "/maps/place/" in current_url:
-                record["URL de la ubicación en Google Maps"] = current_url
+        current_url = page.url
+        if "/maps/place/" in current_url:
+            record["URL de la ubicación en Google Maps"] = current_url
     except Exception:
         pass
 
@@ -234,23 +218,18 @@ async def scrape_google_maps(
     emit("Iniciando navegador...", 0.02)
 
     async with async_playwright() as p:
-        try:
-            browser = await p.chromium.launch(
-                headless=True,
-                args=[
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-blink-features=AutomationControlled",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--disable-extensions",
-                    "--disable-default-apps",
-                    "--lang=es-PY",
-                ],
-            )
-        except Exception as e:
-            emit(f"Error al iniciar el navegador: {e}", 1.0)
-            return []
+        # Launch failure propagates as a real error to the UI
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-blink-features=AutomationControlled",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--lang=es-PY",
+            ],
+        )
 
         try:
             context = await browser.new_context(
@@ -333,64 +312,54 @@ async def scrape_google_maps(
             stale = 0
 
             for _ in range(MAX_SCROLL_ATTEMPTS):
-                try:
-                    if page.is_closed():
-                        break
-                    content = await page.content()
-                    if (
-                        "Has llegado al final de la lista" in content
-                        or "You've reached the end of the list" in content
-                        or "No hay más resultados" in content
-                    ):
-                        break
-
-                    cards = await page.query_selector_all('div[role="article"]')
-                    current_count = len(cards)
-
-                    pct = min(0.10 + (current_count / max(target_count, 1)) * 0.45, 0.55)
-                    emit(f"Cargando... {current_count} negocios encontrados", pct)
-
-                    if current_count >= target_count:
-                        break
-
-                    # Scroll the feed panel
-                    if feed:
-                        try:
-                            await feed.focus()
-                            await feed.press("End")
-                        except Exception:
-                            pass
-
-                    await page.wait_for_timeout(SCROLL_PAUSE_MS + random.randint(0, 400))
-
-                    # JS fallback when stale
-                    if current_count == prev_count:
-                        stale += 1
-                        if stale >= 3:
-                            try:
-                                await page.evaluate(
-                                    "(feed) => { feed.scrollTop = feed.scrollHeight; }",
-                                    feed,
-                                )
-                            except Exception:
-                                pass
-                            await page.wait_for_timeout(1500)
-                        if stale >= 6:
-                            break  # truly exhausted
-                    else:
-                        stale = 0
-
-                    prev_count = current_count
-
-                except Exception:
+                content = await page.content()
+                if (
+                    "Has llegado al final de la lista" in content
+                    or "You've reached the end of the list" in content
+                    or "No hay más resultados" in content
+                ):
                     break
 
-            # ── Extract data from each card ──────────────────────────────────────
-            try:
-                all_cards = await page.query_selector_all('div[role="article"]')
-            except Exception:
-                all_cards = []
+                cards = await page.query_selector_all('div[role="article"]')
+                current_count = len(cards)
 
+                pct = min(0.10 + (current_count / max(target_count, 1)) * 0.45, 0.55)
+                emit(f"Cargando... {current_count} negocios encontrados", pct)
+
+                if current_count >= target_count:
+                    break
+
+                # Scroll the feed panel
+                if feed:
+                    try:
+                        await feed.focus()
+                        await feed.press("End")
+                    except Exception:
+                        pass
+
+                await page.wait_for_timeout(SCROLL_PAUSE_MS + random.randint(0, 400))
+
+                # JS fallback when stale
+                if current_count == prev_count:
+                    stale += 1
+                    if stale >= 3:
+                        try:
+                            await page.evaluate(
+                                "(feed) => { feed.scrollTop = feed.scrollHeight; }",
+                                feed,
+                            )
+                        except Exception:
+                            pass
+                        await page.wait_for_timeout(1500)
+                    if stale >= 6:
+                        break  # truly exhausted
+                else:
+                    stale = 0
+
+                prev_count = current_count
+
+            # ── Extract data from each card ──────────────────────────────────────
+            all_cards = await page.query_selector_all('div[role="article"]')
             cards_to_process = all_cards[batch_offset: batch_offset + BATCH_SIZE]
             total = len(cards_to_process)
 
@@ -401,43 +370,39 @@ async def scrape_google_maps(
             emit(f"Extrayendo datos de {total} negocios...", 0.58)
 
             for idx, card in enumerate(cards_to_process):
-                try:
-                    pct = 0.58 + (idx / max(total, 1)) * 0.40
-                    emit(f"Procesando negocio {idx + 1} de {total}...", pct)
+                pct = 0.58 + (idx / max(total, 1)) * 0.40
+                emit(f"Procesando negocio {idx + 1} de {total}...", pct)
 
-                    record = await extract_card_data(card)
+                record = await extract_card_data(card)
 
-                    # Open detail URL in a new tab to get phone + full address
-                    detail_url = record.get("URL de la ubicación en Google Maps", "N/A")
-                    if detail_url != "N/A" and "/maps/place/" in detail_url:
-                        detail_page = None
-                        try:
-                            detail_page = await context.new_page()
-                            if STEALTH_AVAILABLE:
-                                try:
-                                    await stealth_async(detail_page)
-                                except Exception:
-                                    pass
-                            await detail_page.goto(
-                                detail_url, wait_until="domcontentloaded", timeout=20000
-                            )
-                            record = await extract_detail_panel(detail_page, record)
-                        except Exception:
-                            pass
-                        finally:
-                            if detail_page:
-                                try:
-                                    await detail_page.close()
-                                except Exception:
-                                    pass
+                # Open detail URL in a new tab to get phone + full address
+                detail_url = record.get("URL de la ubicación en Google Maps", "N/A")
+                if detail_url != "N/A" and "/maps/place/" in detail_url:
+                    detail_page = None
+                    try:
+                        detail_page = await context.new_page()
+                        if STEALTH_AVAILABLE:
+                            try:
+                                await stealth_async(detail_page)
+                            except Exception:
+                                pass
+                        await detail_page.goto(
+                            detail_url, wait_until="domcontentloaded", timeout=20000
+                        )
+                        record = await extract_detail_panel(detail_page, record)
+                    except Exception:
+                        pass
+                    finally:
+                        if detail_page:
+                            try:
+                                await detail_page.close()
+                            except Exception:
+                                pass
 
-                        await random_delay()
+                    await random_delay()
 
-                    if record["Nombre de Negocio"] != "N/A":
-                        results.append(record)
-
-                except Exception:
-                    continue
+                if record["Nombre de Negocio"] != "N/A":
+                    results.append(record)
 
             emit("Extracción completada.", 1.0)
 
