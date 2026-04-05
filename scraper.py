@@ -195,6 +195,9 @@ async def scrape_google_maps(
             headless=True,
             args=[
                 "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--single-process",
+                "--no-zygote",
                 "--disable-blink-features=AutomationControlled",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
